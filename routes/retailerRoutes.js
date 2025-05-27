@@ -5,7 +5,7 @@ const upload = require("../middlewares/upload");
 
 // Route: Register Retailer
 
-router.post("/register", controller.registerRetailer);
+// router.post("/register", controller.registerRetailer);
 
 router.post(
   "/register",
@@ -19,7 +19,7 @@ router.post("/login", controller.loginRetailer);
 
 // Update Retailer
 
-router.put("/update/:retailerId", controller.updateRetailer);
+router.put("/update/:retailerId", upload.single("photo"), controller.updateRetailer);
 
 // // Route: Update Basic Details
 

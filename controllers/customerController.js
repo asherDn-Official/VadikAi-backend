@@ -20,6 +20,14 @@ exports.createCustomer = async (req, res) => {
       });
     }
 
+     const customerData = {
+      ...req.body,
+    };
+
+    if (req.file) {
+      customerData.photo = req.file.path;
+    }
+
     // Create new customer
     const newCustomer = new Customer(req.body);
     const savedCustomer = await newCustomer.save();
@@ -125,6 +133,7 @@ exports.getAllCustomers = async (req, res) => {
       interests,
       customerLabel,
       active,
+      status,
       churnRate,
       rating,
       loyaltyPoints,
@@ -148,12 +157,15 @@ exports.getAllCustomers = async (req, res) => {
       filterQuery.$or = [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
+        // { phone: { $regex: search, $options: "i" } },
+        
       ];
     }
 
     if (gender) filterQuery.gender = gender;
     if (source) filterQuery.source = source;
+        if (status) filterQuery.status = status;
+
     if (profession) filterQuery.profession = profession;
     if (incomeLevel) filterQuery.incomeLevel = incomeLevel;
     if (location) filterQuery.location = location;
@@ -227,17 +239,45 @@ exports.getCustomerById = async (req, res) => {
 };
 
 // General update for any field
+// exports.updateCustomer = async (req, res) => {
+//   try {
+//     const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//     });
+//     if (!customer) return res.status(404).json({ error: "Customer not found" });
+//     res.json(customer);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 exports.updateCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const customer = await Customer.findById(req.params.id);
     if (!customer) return res.status(404).json({ error: "Customer not found" });
+
+    // If a new photo is uploaded, delete the old one
+    if (req.file) {
+      if (customer.photo) {
+        const fs = require("fs");
+        const path = require("path");
+        const oldPath = path.join(__dirname, "..", customer.photo);
+        fs.unlink(oldPath, (err) => {
+          if (err) console.warn("Old photo delete error:", err.message);
+        });
+      }
+      req.body.photo = req.file.path;
+    }
+
+    Object.assign(customer, req.body);
+    await customer.save();
+
     res.json(customer);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Delete a customer using Soft delete method  -- use middleware for our better
 exports.deleteCustomer = async (req, res) => {
@@ -270,6 +310,7 @@ exports.updateBasicDetails = async (req, res) => {
       {
         $set: {
           name: req.body.name,
+          photo: req.file ? req.file.path : undefined,
           phone: req.body.phone,
           gender: req.body.gender,
           source: req.body.source,

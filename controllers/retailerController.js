@@ -85,17 +85,17 @@ exports.registerRetailer = async (req, res) => {
 
 exports.loginRetailer = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password , phone} = req.body;
 
     // Input validation
 
-    if (!email || !password) {
+    if (!email || !password || !phone) {
       return res
         .status(400)
         .json({ message: "Email and password are required" });
     }
 
-    const retailer = await Retailer.findOne({ email });
+    const retailer = await Retailer.findOne({ email , phone });
 
     if (!retailer || !retailer.approved) {
       return res
@@ -129,7 +129,7 @@ exports.loginRetailer = async (req, res) => {
 
 exports.updateRetailer = async (req, res) => {
   try {
-    const { retailerId } = req.params; // ID passed as a route param
+    const { retailerId } = req.params;
     const updateData = req.body;
 
     const retailer = await Retailer.findById(retailerId);
@@ -137,7 +137,22 @@ exports.updateRetailer = async (req, res) => {
       return res.status(404).json({ message: "Retailer not found" });
     }
 
-    // Update only the fields that are passed
+    // If a new photo is uploaded, update it
+    if (req.file) {
+      // Delete old photo if it exists
+      if (retailer.photo) {
+        const fs = require('fs');
+        const path = require('path');
+        const oldPhotoPath = path.join(__dirname, '..', retailer.photo);
+        fs.unlink(oldPhotoPath, (err) => {
+          if (err) console.warn("Failed to delete old photo:", err.message);
+        });
+      }
+
+      updateData.photo = req.file.path;
+    }
+
+    // Update fields
     Object.keys(updateData).forEach((key) => {
       retailer[key] = updateData[key];
     });
@@ -154,3 +169,4 @@ exports.updateRetailer = async (req, res) => {
       .json({ message: "Something went wrong. Please try again." });
   }
 };
+

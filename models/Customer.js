@@ -12,6 +12,10 @@ const customerSchema = new mongoose.Schema(
       type: Number,
       unique: true,
     },
+    photo: {
+      type: String,
+      default: "",
+    },
     gender: {
       type: String,
     },
@@ -27,7 +31,7 @@ const customerSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["Walk-In", "Online","Website","Social Media"],
+      enum: ["Walk-In", "Online", "Website", "Social Media"],
     },
     status: {
       type: String,
@@ -61,7 +65,7 @@ const customerSchema = new mongoose.Schema(
     },
     specialDays: {
       type: String,
-      enum: ["BirthDay","Anniversary"],
+      enum: ["BirthDay", "Anniversary"],
     },
     profession: {
       type: String,
@@ -134,7 +138,7 @@ const customerSchema = new mongoose.Schema(
     purchaseHistory: {
       type: String,
     },
-     rating: {
+    rating: {
       type: Number,
       min: 0,
       max: 5,
@@ -167,7 +171,7 @@ const customerSchema = new mongoose.Schema(
     currentBusinessValue: {
       type: Number,
     },
-     predictedFutureValue: {
+    predictedFutureValue: {
       type: Number,
     },
 
@@ -182,12 +186,12 @@ const customerSchema = new mongoose.Schema(
     },
 
     //for Campaigns
-    
+
     preferences: {
-    favoriteProducts: [String],
-    birthday: Date,
-    interests: [String],
-  },
+      favoriteProducts: [String],
+      birthday: Date,
+      interests: [String],
+    },
 
     // Soft‐delete fields:
     isDeleted: {

@@ -4,10 +4,10 @@ const controller = require('../controllers/customerController');
 const upload = require('../middlewares/upload');
 
 
-router.post('/create', controller.createCustomer);
+router.post('/create', upload.single("photo"), controller.createCustomer);
 router.get('/getAll', controller.getAllCustomers);
 router.get('/id/:id', controller.getCustomerById);
-router.put('/update/:id', controller.updateCustomer); // General update
+router.put('/update/:id', upload.single("photo"), controller.updateCustomer); // General update
 router.delete('/delete/:id', controller.deleteCustomer);
 
 
