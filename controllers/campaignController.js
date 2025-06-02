@@ -31,3 +31,15 @@ exports.getCampaigns = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// In campaignController.js or another test route
+exports.testSendNow = async (req, res) => {
+  try {
+    const { campaignId } = req.body;
+    await sendMessage(campaignId);
+    res.status(200).json({ message: "Message sent!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const cron = require("node-cron");
+
 
 require("dotenv").config();
 
@@ -16,8 +18,13 @@ const dailyJobRunner = require("./scheduler/jobRunner");
 
 const productRoutes = require('./routes/productRoutes');
 
+
 const app = express();
 app.use(express.json());
+
+//cors policy
+
+app.use(cors());
 
 // Connect to MongoDB
 mongoose

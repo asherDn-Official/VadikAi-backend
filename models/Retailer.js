@@ -12,11 +12,15 @@ const retailerSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+       sparse: true,
+  required: false,
+  unique: true,
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      sparse: true,
+  required: false,
+  unique: true,
     },
     gender: {
       type: String,
@@ -55,10 +59,21 @@ const retailerSchema = new mongoose.Schema(
     gstNumber: {
       type: String,
     },
+    // numberOfStaffs: {
+    //   type: Number,
+    //   default: 0,
+    // },
+
     numberOfStaffs: {
-      type: Number,
-      default: 0,
-    },
+  type: String,
+  enum: ["1-10", "11-25", "26-50", "50+"],
+  required: true,
+},
+numberOfCustomers: {
+  type: String,
+  // enum: ["0-100", "101-500", "501-1000", "1001-5000","5000+"],
+  required: true,
+},
     shopContactNumber: {
       type: Number,
     },

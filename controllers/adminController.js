@@ -7,20 +7,26 @@ const { sendMail } = require("../utils/sendMail");
 
 exports.registerAdmin = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, phone, role } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+    if ((!email && !phone) || !password) {
+      return res.status(400).json({ message: "Email or Phone number and password are required." });
     }
 
-    const existingAdmin = await Admin.findOne({ email });
+    // const existingAdmin = await Admin.findOne({ $or: [{ email }, { phone }],
+    // });
+     const query = [];
+    if (email) query.push({ email });
+    if (phone) query.push({ phone });
+
+    const existingAdmin = await Admin.findOne({ $or: query });
     if (existingAdmin) {
-      return res.status(409).json({ message: "Admin with this email already exists." });
+      return res.status(409).json({ message: "Admin with this email or phone already exists." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin = new Admin({ email, password: hashedPassword, role });
+    const admin = new Admin({ email, phone, password: hashedPassword, role });
     await admin.save();
 
     res.status(201).json({ message: "Admin registered successfully." });
@@ -34,13 +40,15 @@ exports.registerAdmin = async (req, res) => {
 
 exports.loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    const admin = await Admin.findOne({ email });
+    const admin = await Admin.findOne({  $or: [{ email: identifier }, { phone: identifier }],
+    });
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
@@ -98,7 +106,7 @@ exports.getRetailers = async (req, res) => {
   }
 };
 
-exports.approveRetailer = async (req, res) => {
+exports.approveRetailer = async (req, res,) => {
   try {
     const { retailerId } = req.params;
 
@@ -118,7 +126,9 @@ exports.approveRetailer = async (req, res) => {
 
     await retailer.save();
 
-    await sendCredentials(retailer.email, tempPassword);
+    const fullName = `${retailer.firstName} ${retailer.lastName}`;
+
+    await sendCredentials(retailer.email, tempPassword, fullName);
 
     res.status(200).json({ message: "Retailer approved and credentials sent." });
   } catch (error) {

@@ -6,9 +6,11 @@ const { WHATSAPP_TOKEN, PHONE_NUMBER_ID, API_URL } = require('../config/metaApi'
 
 exports.sendMessage = async (campaignId) => {
   const campaign = await Campaign.findById(campaignId);
+  console.log("✅ sendMessage() triggered for:", campaignId);
   if (!campaign) return;
 
   const users = await filterUsers(campaign.filters);
+  console.log("Sending to users:", users.map(u => u.phone));
 
   for (const user of users) {
     try {
