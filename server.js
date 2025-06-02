@@ -18,6 +18,7 @@ const dailyJobRunner = require("./scheduler/jobRunner");
 
 const productRoutes = require('./routes/productRoutes');
 
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 app.use(express.json());
@@ -26,6 +27,7 @@ app.use(express.json());
 
 app.use(cors());
 
+app.use(express.urlencoded({ extended: true }));  // for parsing application/x-www-form-urlencoded
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
@@ -46,6 +48,9 @@ app.use("/dashboard", dashboardRoutes);
 app.use("/campaigns", campaignRoutes);
 
 app.use("/products", productRoutes);
+
+app.use('/orders', orderRoutes);
+
 
 
 // Schedule the job to run every midnight
