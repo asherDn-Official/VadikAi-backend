@@ -1,13 +1,6 @@
 const nodemailer = require("nodemailer");
 
 exports.sendCredentials = async (email, password,  fullName = "User") => {
-  //   const transporter = nodemailer.createTransport({
-  //     service: "gmail",
-  //     auth: {
-  //       user: process.env.EMAIL_USER,
-  //       pass: process.env.EMAIL_PASS,
-  //     },
-  //   });
 
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -18,13 +11,7 @@ exports.sendCredentials = async (email, password,  fullName = "User") => {
       pass: process.env.EMAIL_PASS,
     },
   });
-  // const mailOptions = {
-  //   from: process.env.EMAIL_USER,
-  //   to: email,
-  //   subject: "Your Credentials",
-  //   text: `Your account is approved. Login credentials:\nEmail: ${email}\nPassword: ${password}`,
-  // };
-// const fullName = `${retailer.firstName} ${retailer.lastName}`;
+ 
   const mailOptions = {
     from: `"Vadik.Ai" <${process.env.EMAIL_USER}>`,
     to: email,

@@ -8,6 +8,12 @@ const productSchema = new mongoose.Schema({
   status: { type: String, enum: ['In Stock', 'Out of Stock', 'Limited Stock'], default: 'In Stock' },
   category: { type: String, required: true },
   images: [String],
+
+// Optional fields for chatbot
+
+  tags: [String],
+  inStock: Boolean,
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

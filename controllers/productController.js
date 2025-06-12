@@ -3,6 +3,7 @@ const path = require('path');
 const Product = require('../models/Product');
 
 // List products with search, filter, sort, and pagination
+
 exports.getProducts = async (req, res) => {
   try {
     const {
@@ -35,6 +36,7 @@ exports.getProducts = async (req, res) => {
 };
 
 // Add a new product
+
 exports.addProduct = async (req, res) => {
   try {
     const { name, description, colors, price, status, category } = req.body;
@@ -59,6 +61,7 @@ exports.addProduct = async (req, res) => {
 };
 
 // Edit existing product
+
 exports.editProduct = async (req, res) => {
   try {
     const { name, description, colors, price, status, category } = req.body;
@@ -88,6 +91,7 @@ exports.editProduct = async (req, res) => {
 
 
 // Delete a product by ID
+
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

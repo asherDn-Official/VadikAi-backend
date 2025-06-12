@@ -73,11 +73,6 @@ exports.loginAdmin = async (req, res) => {
 };
 
 
-// exports.getRetailers = async (req, res) => {
-//   const retailers = await Retailer.find();
-//   res.json(retailers);
-// };
-
 exports.getRetailers = async (req, res) => {
   try {
     const filters = {};

@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 
 const customerSchema = new mongoose.Schema(
   {
-    //Basic details
-
+    // Basic details
     name: {
       type: String,
       required: true,
@@ -55,143 +54,44 @@ const customerSchema = new mongoose.Schema(
       default: Date.now,
     },
 
-    //Advanced details
+    // Advanced details
 
-    dateOfBirth: {
-      type: Date,
-    },
-    dateOfAnniversary: {
-      type: Date,
-    },
-    specialDays: {
-      type: String,
-      enum: ["BirthDay", "Anniversary"],
-    },
-    profession: {
-      type: String,
-    },
-    incomeLevel: {
-      type: String,
-      enum: ["Low", "Medium", "High"],
-    },
-    location: {
-      type: String,
-    },
-    favouriteProducts: {
-      // type: [String], // changed as array to String for excel file import
-      type: String,
-    },
-    favouriteColour: {
-      type: String,
-    },
-    favouriteBrands: {
-      // type: [String],
-      type: String,
-    },
-    lifeStyle: {
-      type: String,
-    },
-    interests: {
-      // type: [String],
-      type: String,
-    },
-    customerLabel: {
-      type: String,
-      enum: ["WhatsApp", "Email", "SMS", "Phone Call", "In-Person"],
+    advancedDetails: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
-    //Advanced Privacy details
+    // Advanced Privacy details
 
-    communicationChannel: {
-      type: String,
-      enum: ["WhatsApp", "Email", "SMS", "Phone Call", "In-Person"],
-    },
-    typesOfCommunication: {
-      type: String,
-      enum: ["Discount Offers", "New Arrivals", "Fashion Trends"],
-    },
-    privacyNotes: {
-      type: String,
-      enum: [
-        "I agree to share my data with Vadik.Ai",
-        "I do not want to share my data with Vadik.Ai",
-      ],
-    },
-    satisfactionScore: {
-      type: Number,
-      min: 1,
-      max: 5,
-    },
-    engagementScore: {
-      type: Number,
-      min: 1,
-      max: 100,
-    },
-    optOption: {
-      type: String,
-      enum: ["Opt-In", "Opt-Out"],
-    },
-    loyaltyPoints: {
-      type: Number,
-      default: 5000,
-    },
-    purchaseHistory: {
-      type: String,
-    },
-    rating: {
-      type: Number,
-      min: 0,
-      max: 5,
-    },
-    products: {
-      // type: [String],
-      type: String,
-    },
-    purchaseDate: {
-      type: Date,
-      default: Date.now,
-    },
-    amountSpent: {
-      type: Number,
-    },
-    quantity: {
-      type: Number,
-    },
-    // Response
-    responseRate: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-    clickRate: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-    currentBusinessValue: {
-      type: Number,
-    },
-    predictedFutureValue: {
-      type: Number,
+    privacyDetails: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
-    // Referral
+    // Reference details
 
-    referralCode: { type: String },
-    refJoinDate: { type: Date, default: Date.now },
-    refStatus: {
-      type: String,
-      enum: ["Success", "Failed"],
-      default: "Success",
+    referenceDetails: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
-    //for Campaigns
+    // For Campaigns
 
     preferences: {
       favoriteProducts: [String],
       birthday: Date,
       interests: [String],
     },
+
+    // For Chatbot
+
+    preference: [String],
+
+    orderCount: Number,
+    totalSpend: Number,
 
     // Soft‐delete fields:
     isDeleted: {

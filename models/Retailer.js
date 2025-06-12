@@ -59,11 +59,6 @@ const retailerSchema = new mongoose.Schema(
     gstNumber: {
       type: String,
     },
-    // numberOfStaffs: {
-    //   type: Number,
-    //   default: 0,
-    // },
-
     numberOfStaffs: {
   type: String,
   enum: ["1-10", "11-25", "26-50", "50+"],
@@ -95,11 +90,16 @@ numberOfCustomers: {
       type: Date,
     },
 
-    // mustChangePassword: {
-    //   type: Boolean,
-    //   default: true, // Required change on first login
-    // },
+    //roles & permissions
+   employees: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+    },
+  ],
+
   },
+
 
   { timestamps: true }
 );

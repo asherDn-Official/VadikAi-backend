@@ -1,40 +1,31 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/retailerController");
+// const controller = require("../controllers/retailerController");
+const retailerController = require("../controllers/retailerController");
+const otpController = require("../controllers/otpController");
 const upload = require("../middlewares/upload");
 
 // Route: Register Retailer
 
-// router.post("/register", controller.registerRetailer);
-
 router.post(
   "/register",
   upload.single("photo"), // `photo` is the field name for the uploaded file
- controller.registerRetailer
+ retailerController.registerRetailer
 );
 
 // Route: Login Retailer
 
-router.post("/login", controller.loginRetailer);
+router.post("/login", retailerController.loginRetailer);
 
 // Update Retailer
 
-router.put("/update/:retailerId", upload.single("photo"), controller.updateRetailer);
+router.put("/update/:retailerId", upload.single("photo"), retailerController.updateRetailer);
 
-// // Route: Update Basic Details
+// OTP-based password reset
 
-// router.put('/basic/:id', controller.updateBasicDetails);
+router.post("/send-otp", otpController.sendOTP);
+router.post("/verify-otp", otpController.verifyOTP);
 
-// // Route: Update Advanced Details
-
-// router.put('/advanced/:id', controller.updateAdvancedDetails);
-
-// // Route: Update Privacy Details
-
-// router.put('/privacy/:id', controller.updatePrivacyDetails);
-
-// // Route: Update Referral Details
-
-// router.put('/referral/:id', controller.updateReferralDetails);
+// router.post("/reset-password/:token", retailerController.resetPassword);  - use password controller instead of retailerController
 
 module.exports = router;

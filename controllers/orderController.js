@@ -2,57 +2,6 @@ const Order = require('../models/Order');
 const DailyBilling = require('../models/DailyBilling');
 
 // Create a new order
-// exports.createOrder = async (req, res) => {
-//   try {
-//     const { customerName, mobileNumber, gender, customerType, products, discount } = req.body;
-    
-//     // Calculate totals
-//     const subtotal = products.reduce((sum, product) => sum + product.totalPrice, 0);
-//     const grandTotal = subtotal - discount;
-    
-//     // Generate order ID
-//     const orderId = `ORD-${Date.now()}`;
-    
-//     const order = new Order({
-//       customerName,
-//       mobileNumber,
-//       gender,
-//       customerType,
-//       orderId,
-//       products,
-//       subtotal,
-//       discount,
-//       grandTotal
-//     });
-    
-//     await order.save();
-    
-//     // Update daily billing
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-    
-//     let dailyBilling = await DailyBilling.findOne({ date: today });
-    
-//     if (!dailyBilling) {
-//       dailyBilling = new DailyBilling({
-//         date: today,
-//         numberOfCustomers: 0,
-//         totalSales: 0,
-//         orders: []
-//       });
-//     }
-    
-//     dailyBilling.numberOfCustomers += 1;
-//     dailyBilling.totalSales += grandTotal;
-//     dailyBilling.orders.push(order._id);
-    
-//     await dailyBilling.save();
-    
-//     res.status(201).json({ success: true, order });
-//   } catch (error) {
-//     res.status(500).json({ success: false, error: error.message });
-//   }
-// };
 
 exports.createOrder = async (req, res) => {
   try {
@@ -164,3 +113,75 @@ exports.getOrdersByDate = async (req, res) => {
   }
 };
 
+// Get daily billing summary
+exports.getDailyBillingSummary = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    const query = {};
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      query.date = { $gte: start, $lte: end };
+    }
+    
+    const dailyBillings = await DailyBilling.find(query)
+      .sort({ date: -1 });
+    
+    res.status(200).json({ success: true, dailyBillings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
+// Import orders from file (CSV/Excel)
+exports.importOrders = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    const importedOrders = processUploadedFile(req.file);
+    
+    // Create orders in bulk
+    const createdOrders = await Order.insertMany(importedOrders);
+    
+    // Update daily billing for each order
+    for (const order of createdOrders) {
+      const orderDate = new Date(order.createdAt);
+      const { start } = getDayRange(orderDate);
+      
+      await DailyBilling.findOneAndUpdate(
+        { date: start },
+        {
+          $inc: { 
+            numberOfCustomers: 1,
+            totalSales: order.grandTotal 
+          },
+          $push: { orders: order._id }
+        },
+        { upsert: true }
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Orders imported successfully',
+      count: createdOrders.length,
+      orders: createdOrders
+    });
+  } catch (error) {
+    console.error('Error importing orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

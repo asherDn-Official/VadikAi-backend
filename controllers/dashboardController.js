@@ -51,39 +51,6 @@ exports.getCustomerProfileOverview = async (req, res) => {
   }
 };
 
-// Calculate Retention Rate %
-// Retention Rate = (# retention customers in period) / (# customers at start of period) * 100
-// exports.getCustomerRetentionRate = async (req, res) => {
-//   try {
-//     const { startDate, endDate } = req.query;
-//     if (!startDate || !endDate) {
-//       return res.status(400).json({ error: "startDate and endDate required" });
-//     }
-
-//     const start = new Date(startDate);
-//     const end = new Date(endDate);
-
-//     // Customers before period start
-//     const customersBeforePeriod = await Customer.find({
-//       firstVisit: { $lt: start },
-//     });
-
-//     const retentionCustomers = await Customer.find({
-//       firstVisit: { $lt: start },
-//       lastVisit: { $gte: start, $lte: end },
-//     });
-
-//     const rate =
-//       customersBeforePeriod.length === 0
-//         ? 0
-//         : (retentionCustomers.length / customersBeforePeriod.length) * 100;
-
-//     res.json({ retentionRate: rate.toFixed(2) });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
 exports.getCustomerRetentionRate = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -163,24 +130,7 @@ exports.getChurnRate = async (req, res) => {
   }
 };
 
-// Average Customer Engagement Score (%)
-// exports.getCustomerEngagementScore = async (req, res) => {
-//   try {
-//     // Average engagementScore across all customers
-//     const result = await Customer.aggregate([
-//       {
-//         $group: {
-//           _id: null,
-//           avgEngagement: { $avg: "$engagementScore" },
-//         },
-//       },
-//     ]);
-//     const avgEngagement = result.length ? result[0].avgEngagement : 0;
-//     res.json({ avgEngagementScore: avgEngagement.toFixed(2) });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
+// Average Customer Engagement Score
 
 exports.getCustomerEngagementScore = async (req, res) => {
   try {

@@ -10,6 +10,19 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (
+    (file.fieldname === 'photo' && ['.jpg', '.jpeg', '.png'].includes(ext)) ||
+    (file.fieldname === 'file' && ['.xls', '.xlsx'].includes(ext))
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Unsupported file type for field ${file.fieldname}`));
+  }
+};
+
+const upload = multer({ storage, fileFilter });
 
 module.exports = upload;

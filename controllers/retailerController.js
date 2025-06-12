@@ -1,24 +1,19 @@
 const Retailer = require("../models/Retailer");
+const Employee = require("../models/Employee"); // for login both in one endpoint
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const { sendMail } = require("../utils/sendMail");
+const validator = require("validator");
 
-// exports.registerRetailer = async (req, res) => {
-//   const { name, email } = req.body;
-//   const existing = await Retailer.findOne({ email });
-//   if (existing) return res.status(400).json({ message: "Already registered" });
-
-//   const retailer = new Retailer({ name, email });
-//   await retailer.save();
-//   res.json({ message: "Retailer registered. Awaiting approval." });
-// };
 
 function formatPhone(phone, countryCode = "91") {
   const digits = phone.replace(/\D/g, "");
   return digits.startsWith(countryCode) ? digits : countryCode + digits;
 }
+
+// register Retailer
 
 exports.registerRetailer = async (req, res) => {
   try {
@@ -82,6 +77,7 @@ exports.registerRetailer = async (req, res) => {
       ownerName,
       profileId,
       // password
+      
     });
 
     await retailer.save();
@@ -143,96 +139,76 @@ const html = `
   }
 };
 
-// exports.loginRetailer = async (req, res) => {
-//   try {
-//     const { email, password , phone} = req.body;
+// common Login for Retailer and Employee
 
-//     // Input validation
-
-//     if ((!email && !phone) || !password) {
-//       return res
-//         .status(400)
-//         .json({ message: "Email/Phone and password are required" });
-//     }
-
-//     const formattedPhone = phone ? formatPhone(phone) : null;
-
-//     const retailer = await Retailer.findOne({ $or: [{ email }, { phone: formattedPhone }],
-//     });
-
-//     if (!retailer || !retailer.approved) {
-//       return res
-//         .status(403)
-//         .json({ message: "Retailer not approved or does not exist" });
-//     }
-
-//     const match = await bcrypt.compare(password, retailer.password);
-//     if (!match) {
-//       return res.status(401).json({ message: "Invalid credentials" });
-//     }
-
-//     const token = jwt.sign({ id: retailer._id }, process.env.JWT_SECRET, {
-//       expiresIn: "7d", // Token expiration time
-//     });
-
-//     res.json({
-//       token,
-
-//       retailer: {
-//         id: retailer._id,
-//         name: retailer.firstName + " " + retailer.lastName,
-//         email: retailer.email,
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Login error:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
 
 exports.loginRetailer = async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
     if (!identifier || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email or Phone and password are required" });
+      return res.status(400).json({ message: "Email or Phone and password are required" });
     }
 
-    // Format phone if it's a number
-    let retailer;
-    const isPhone = /^\d{6,}$/.test(identifier); // basic check for phone-like input
+    const isPhone = /^\d{10}$/.test(identifier);
+    const isEmail = /^\S+@\S+\.\S+$/.test(identifier);
+
+    if (!isPhone && !isEmail) {
+      return res.status(400).json({ message: "Invalid email or phone number format" });
+    }
+
+    // First check if it's a retailer
+    let user;
     if (isPhone) {
-      const formattedPhone = formatPhone(identifier);
-      retailer = await Retailer.findOne({ phone: formattedPhone });
+      user = await Retailer.findOne({ phone: identifier });
     } else {
-      retailer = await Retailer.findOne({ email: identifier });
+      user = await Retailer.findOne({ email: identifier });
     }
 
-    if (!retailer || !retailer.approved) {
-      return res
-        .status(403)
-        .json({ message: "Retailer not approved or does not exist" });
+    if (user && user.approved) {
+      const isRetailerMatch = await bcrypt.compare(password, user.password);
+      if (isRetailerMatch) {
+        const token = jwt.sign({ id: user._id, role: "retailer" }, process.env.JWT_SECRET, {
+          expiresIn: "7d",
+        });
+
+        return res.json({
+          token,
+          user: {
+            id: user._id,
+            name: user.firstName + " " + user.lastName,
+            email: user.email,
+            role: "retailer"
+          },
+        });
+      }
     }
 
-    const match = await bcrypt.compare(password, retailer.password);
-    if (!match) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: retailer._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+    // If not a retailer, try employee login
+    const employee = await Employee.findOne({
+      $or: [{ email: identifier }, { phone: identifier }],
     });
 
-    res.json({
-      token,
-      retailer: {
-        id: retailer._id,
-        name: retailer.firstName + " " + retailer.lastName,
-        email: retailer.email,
-      },
-    });
+    if (employee && !employee.isDeleted) {
+      const isEmployeeMatch = await bcrypt.compare(password, employee.password);
+      if (isEmployeeMatch) {
+        const token = jwt.sign({ id: employee._id, role: "employee" }, process.env.JWT_SECRET, {
+          expiresIn: "7d",
+        });
+
+        return res.json({
+          token,
+          user: {
+            id: employee._id,
+            name: employee.fullName,
+            email: employee.email,
+            role: "employee"
+          },
+        });
+      }
+    }
+
+    return res.status(401).json({ message: "Invalid credentials" });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Internal server error" });
