@@ -44,7 +44,7 @@ exports.registerRetailer = async (req, res) => {
     });
 
     if (existing) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({ message: "Email or Phone already registered" });
     }
 
     const profileId = Date.now();

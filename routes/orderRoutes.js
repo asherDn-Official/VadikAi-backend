@@ -15,7 +15,7 @@ router.get('/daily-billing', orderController.getDailyBillingSummary);
 // Import orders from file
 router.post(
   '/import',
-  upload.single('ordersFile'), 
+  upload.single('file'), 
   orderController.importOrders
 );
 
