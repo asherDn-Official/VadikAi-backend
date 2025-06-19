@@ -43,24 +43,24 @@ mongoose
   });
 
 // Routes
-app.use("/admin", adminRoutes);
-app.use("/retailer", retailerRoutes);
-app.use("/password", passwordRoutes);
-app.use("/customer", customerRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/retailer", retailerRoutes);
+app.use("/api/password", passwordRoutes);
+app.use("/api/customer", customerRoutes);
 // app.use("/dashboard", dashboardRoutes);
 
 // app.use("/campaigns", campaignRoutes);
 
-app.use("/products", productRoutes);
+app.use("/api/products", productRoutes);
 
-app.use('/orders', orderRoutes);
+app.use('/api/orders', orderRoutes);
 
-app.use("/employee", employeeRoutes);
+app.use("/api/employee", employeeRoutes);
 
 
 //for chatbot
 
-app.use('/chat', chatRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Schedule the job to run every midnight
 // cron.schedule("0 0 * * *", dailyJobRunner);
