@@ -40,10 +40,10 @@ exports.registerAdmin = async (req, res) => {
 
 exports.loginAdmin = async (req, res) => {
   try {
-    // const { email, password } = req.body;
-    const { identifier, password } = req.body;
+    const { email, password } = req.body;
+    // const { identifier, password } = req.body;
 
-    if (!identifier || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
